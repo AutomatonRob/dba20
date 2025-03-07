@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat</title>
+  <script>
+    async function sendMessage() {
+      let username = document.getElementById("username").value;
+      let message = document.getElementById("message").value;
+
+      if (!username || !message) return;
+
+      await fetch("send_message.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, message })
+      });
+
+      document.getElementById("message").value = "";
+      loadMessages();
+    }
+
+    async function loadMessages() {
+      let response = await fetch("get_messages.php");
+      let messages = await response.json();
+      document.getElementById("chat").innerHTML = messages.map(m =>
+              `<p><strong>${m.username}:</strong> ${m.message} <small>(${m.created_at})</small></p>`
+      ).join("");
+    }
+
+    setInterval(loadMessages, 3000);
+    window.onload = loadMessages;
+  </script>
+</head>
+<body>
+<h2>Live Chat</h2>
+<div id="chat"></div>
+<input id="username" placeholder="Name">
+<input id="message" placeholder="Nachricht">
+<button onclick="sendMessage()">Senden</button>
+</body>
+</html>
